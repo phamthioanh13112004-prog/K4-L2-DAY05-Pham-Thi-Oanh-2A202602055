@@ -1,0 +1,26 @@
+[
+  {
+    "name": "pole",
+    "color": "#999999",
+    "type": "any",
+    "attributes": []
+  },
+  {
+    "name": "traffic sign",
+    "color": "#dcdc00",
+    "type": "any",
+    "attributes": []
+  },
+  {
+    "name": "sky",
+    "color": "#4682b4",
+    "type": "any",
+    "attributes": []
+  },
+  {
+    "name": "road",
+    "color": "#804080",
+    "type": "any",
+    "attributes": []
+  }
+]

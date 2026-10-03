@@ -1,0 +1,4 @@
+# Optional scoring dependencies. Learners can annotate and submit without these.
+numpy
+pillow
+pycocotools

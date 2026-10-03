@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Hướng dẫn trực quan Day 5 Segmentation: 14 ảnh, 9 task, CVAT local từng bước; fork, push và nộp link trên VLearn trong 24 giờ.">
+  <title>Day 5 | Segmentation Field Guide</title>
+  <style>
+    :root {
+      --paper: oklch(0.985 0.004 245);
+      --surface: oklch(1 0 0);
+      --ink: oklch(0.22 0.025 250);
+      --muted: oklch(0.43 0.025 250);
+      --line: oklch(0.82 0.015 250);
+      --accent: oklch(0.43 0.15 260);
+      --accent-light: oklch(0.94 0.025 260);
+      --caution: oklch(0.34 0.09 68);
+      --caution-bg: oklch(0.95 0.04 72);
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-12: 48px;
+      --space-16: 64px;
+      --radius: 8px;
+      --ease: cubic-bezier(0.25, 1, 0.5, 1);
+      --deep: oklch(0.18 0.03 250);
+      --deep-soft: oklch(0.28 0.035 250);
+      --signal: oklch(0.75 0.15 72);
+      --signal-soft: oklch(0.94 0.045 72);
+      --mint: oklch(0.88 0.075 168);
+      --z-header: 20;
+      --z-lightbox: 40;
+      font-family: "Be Vietnam Pro", "Helvetica Neue", sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; font-size: 1rem; line-height: 1.65; }
+    a { color: var(--accent); text-underline-offset: 3px; }
+    a:hover { text-decoration-thickness: 2px; }
+    a:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: var(--radius); }
+    .skip { position: absolute; left: var(--space-4); top: -80px; background: var(--surface); padding: var(--space-3); z-index: 10; }
+    .skip:focus { top: var(--space-4); }
+    header { position: sticky; top: 0; z-index: var(--z-header); border-bottom: 1px solid var(--line); background: var(--surface); }
+    .bar { max-width: 1280px; margin: auto; min-height: 64px; padding: var(--space-2) var(--space-6); display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
+    .brand { font-weight: 700; color: var(--ink); text-decoration: none; white-space: nowrap; }
+    .brand b { display: inline-grid; place-items: center; width: 40px; height: 40px; margin-right: var(--space-2); background: var(--deep); color: var(--surface); }
+    nav { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    nav a { min-height: 44px; display: inline-flex; align-items: center; padding: 0 var(--space-3); color: var(--ink); text-decoration: none; font-weight: 600; border-radius: var(--radius); }
+    nav a:hover, nav a:active { background: var(--accent-light); }
+    main { max-width: 1280px; margin: auto; padding: 0 var(--space-6) var(--space-16); }
+    .hero { display: grid; grid-template-columns: minmax(0, 6fr) minmax(280px, 6fr); gap: var(--space-12); padding: var(--space-16) 0; align-items: center; min-height: calc(100dvh - 64px); }
+    .eyebrow { font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin: 0 0 var(--space-4); }
+    h1, h2, h3 { line-height: 1.18; text-wrap: balance; }
+    h1 { font-size: clamp(2.75rem, 4.7vw, 4.5rem); letter-spacing: -.025em; margin: 0 0 var(--space-6); max-width: 18ch; }
+    h1 span { color: var(--accent); }
+    h2 { font-size: clamp(2rem, 3vw, 3rem); margin: 0 0 var(--space-6); }
+    h3 { font-size: 1.35rem; margin: 0 0 var(--space-3); }
+    p { max-width: 72ch; text-wrap: pretty; }
+    .lead { font-size: 1.2rem; max-width: 62ch; margin: 0; }
+    .quickstart { background: var(--accent-light); padding: var(--space-8); border-radius: var(--radius); }
+    .hero-visual { position: relative; margin: 0; background: var(--deep); color: var(--surface); overflow: hidden; }
+    #top { scroll-margin-top: 64px; }
+    .hero-visual img { display: block; width: 100%; height: clamp(320px, 38vw, 500px); object-fit: cover; }
+    .hero-visual figcaption { padding: var(--space-6); color: var(--surface); }
+    .hero-visual figcaption strong { display: block; color: var(--signal); font-size: .8rem; letter-spacing: .07em; text-transform: uppercase; }
+    .hero-visual figcaption span { display: block; margin-top: var(--space-2); font-size: 1.2rem; font-weight: 700; }
+    .hero-linkrow { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+    .action.secondary { background: transparent; color: var(--accent); }
+    .action.secondary:hover { background: var(--accent-light); color: var(--ink); }
+    .route-band { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; margin: 0 0 var(--space-16); padding: 1px; list-style: none; background: var(--deep); }
+    .route-band li { padding: var(--space-6); background: var(--deep); color: var(--surface); }
+    .route-band strong { display: block; color: var(--signal); font-size: .8rem; letter-spacing: .07em; text-transform: uppercase; }
+    .route-band span { display: block; margin-top: var(--space-2); font-size: 1.1rem; font-weight: 700; }
+    .route-band small { display: block; margin-top: var(--space-2); color: var(--mint); }
+    .impact { display: grid; grid-template-columns: minmax(220px, 4fr) minmax(0, 8fr); gap: var(--space-12); align-items: start; }
+    .impact > p { margin: 0; padding: var(--space-8); background: var(--deep); color: var(--surface); font-size: 1.5rem; line-height: 1.35; }
+    .impact-list { display: grid; gap: var(--space-4); }
+    .impact-list article { display: grid; grid-template-columns: 64px 1fr; gap: var(--space-4); padding-bottom: var(--space-4); border-bottom: 1px solid var(--line); }
+    .impact-list b { color: var(--accent); font-size: 1.4rem; }
+    .impact-list h3, .impact-list p { margin: 0; }
+    .impact-list p { color: var(--muted); margin-top: var(--space-2); }
+    .readiness { display: grid; grid-template-columns: minmax(0, 7fr) minmax(250px, 5fr); gap: var(--space-8); }
+    .check-panel { padding: var(--space-8); background: var(--surface); border: 1px solid var(--line); }
+    .check-panel h3 { margin-bottom: var(--space-4); }
+    .check-panel label { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--line); }
+    .check-panel label:last-of-type { border-bottom: 0; }
+    .check-panel input { width: 20px; height: 20px; margin-top: 3px; accent-color: var(--accent); flex: none; }
+    .check-panel label span { display: block; }
+    .check-panel label small { display: block; color: var(--muted); }
+    .progress { margin-top: var(--space-4); font-weight: 700; }
+    .progress-track { display: block; height: 8px; margin-top: var(--space-2); background: var(--accent-light); }
+    .progress-track i { display: block; height: 100%; width: 0; background: var(--accent); transition: width 200ms var(--ease); }
+    .rule-card { padding: var(--space-8); background: var(--signal-soft); }
+    .rule-card h3 { margin-bottom: var(--space-4); }
+    .rule-card p { margin: 0 0 var(--space-4); }
+    .rule-card a { font-weight: 700; }
+    .image-grid { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: var(--space-4); }
+    .data-card { margin: 0; min-width: 0; background: var(--surface); border: 1px solid var(--line); }
+    .data-card a { display: block; color: inherit; text-decoration: none; }
+    .data-card img { display: block; width: 100%; height: 250px; object-fit: cover; }
+    .data-card figcaption { padding: var(--space-4); color: var(--ink); }
+    .data-card figcaption strong { display: block; color: var(--accent); }
+    .data-card figcaption span { display: block; margin-top: var(--space-2); color: var(--muted); }
+    .data-card a:hover img, .data-card a:focus-visible img { filter: contrast(1.12); }
+    .data-card a:active img { filter: contrast(1.2); }
+    .decision-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); margin-top: var(--space-8); }
+    .decision-grid article { padding: var(--space-6); background: var(--deep); color: var(--surface); }
+    .decision-grid b { color: var(--signal); }
+    .decision-grid h3 { margin-top: var(--space-3); }
+    .decision-grid p { margin-bottom: 0; }
+    .case-practice { margin-top: var(--space-12); }
+    .case-practice h3 { margin-bottom: var(--space-3); }
+    .case-practice > p { margin-bottom: var(--space-6); color: var(--muted); }
+    .case-practice details { border-top: 1px solid var(--line); }
+    .case-practice details:last-child { border-bottom: 1px solid var(--line); }
+    .case-practice summary { min-height: 56px; padding: var(--space-4) var(--space-2); cursor: pointer; font-weight: 700; }
+    .case-practice summary:hover { color: var(--accent); }
+    .case-practice summary:active { color: var(--ink); }
+    .case-practice summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+    .case-practice details p { max-width: 72ch; padding: 0 var(--space-2) var(--space-4); margin: 0; }
+    .checkpoint-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
+    .checkpoint-grid a { color: var(--ink); text-decoration: none; background: var(--surface); border: 1px solid var(--line); }
+    .checkpoint-grid img { display: block; width: 100%; height: 180px; object-fit: cover; }
+    .checkpoint-grid span { display: block; padding: var(--space-4); }
+    .checkpoint-grid strong { display: block; color: var(--accent); }
+    .checkpoint-grid small { color: var(--muted); }
+    .checkpoint-grid a:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .checkpoint-grid a:active { transform: translateY(2px); }
+    .glossary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-8); }
+    .glossary div { border-top: 2px solid var(--deep); padding-top: var(--space-3); }
+    .glossary dt { font-weight: 800; font-size: 1.15rem; }
+    .glossary dd { margin: var(--space-2) 0 0; color: var(--muted); }
+    .lightbox { position: fixed; z-index: var(--z-lightbox); inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; padding: 0; border: 0; background: var(--deep); color: var(--surface); }
+    .lightbox::backdrop { background: var(--deep); }
+    .lightbox-head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); min-height: 64px; padding: var(--space-2) var(--space-6); }
+    .lightbox button { min-height: 44px; padding: var(--space-2) var(--space-4); color: var(--surface); background: var(--deep-soft); border: 1px solid var(--surface); cursor: pointer; }
+    .lightbox button:hover, .lightbox button:focus-visible { background: var(--accent); }
+    .lightbox button:active { transform: translateY(2px); }
+    .lightbox-stage { height: calc(100dvh - 132px); overflow: auto; display: grid; place-items: center; }
+    .lightbox img { display: block; max-width: 100%; max-height: 100%; margin: auto; object-fit: contain; }
+    .lightbox.zoomed .lightbox-stage { display: block; }
+    .lightbox.zoomed img { width: auto; max-width: none; max-height: none; margin: 0; }
+    .lightbox-caption { padding: var(--space-3) var(--space-6); margin: 0; color: var(--surface); }
+    .quickstart h2 { font-size: 1.4rem; margin-bottom: var(--space-4); }
+    .quickstart ol { margin: 0; padding-left: var(--space-6); }
+    .quickstart li + li { margin-top: var(--space-3); }
+    .action { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: var(--space-2) var(--space-4); margin-top: var(--space-6); border: 2px solid var(--accent); border-radius: var(--radius); text-decoration: none; font-weight: 700; background: var(--accent); color: var(--surface); transition: transform 150ms var(--ease), background-color 150ms var(--ease); }
+    .action:hover { transform: translateY(-2px); background: var(--ink); border-color: var(--ink); color: var(--surface); }
+    .action:active { transform: translateY(2px); }
+    section { padding: var(--space-16) 0; border-top: 1px solid var(--line); scroll-margin-top: 64px; }
+    .section-head { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-12); align-items: start; margin-bottom: var(--space-8); }
+    .section-head p { margin-top: var(--space-2); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; background: var(--surface); font-variant-numeric: tabular-nums; }
+    th, td { padding: var(--space-4); text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { font-size: .9rem; background: var(--accent-light); }
+    .step { display: grid; grid-template-columns: minmax(240px, 4fr) minmax(0, 8fr); gap: var(--space-8); align-items: start; padding: var(--space-8) 0; border-top: 1px solid var(--line); }
+    .step:first-of-type { border-top: 0; }
+    .step .number { font-size: .85rem; color: var(--accent); font-weight: 700; margin: 0 0 var(--space-3); }
+    .step p { margin: 0 0 var(--space-3); }
+    figure { margin: 0; }
+    figure a { display: block; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+    figure a:hover img { transform: scale(1.01); }
+    figure img { display: block; width: 100%; height: auto; transition: transform 200ms var(--ease); }
+    figcaption { color: var(--muted); font-size: .9rem; padding-top: var(--space-2); }
+    .note { background: var(--caution-bg); color: var(--caution); padding: var(--space-4) var(--space-6); border-radius: var(--radius); max-width: 78ch; }
+    .command { overflow-x: auto; padding: var(--space-4) var(--space-6); border-radius: var(--radius); background: var(--ink); color: var(--surface); line-height: 1.7; }
+    .timeline { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6); }
+    .block { border-top: 2px solid var(--ink); padding-top: var(--space-4); }
+    .block strong { font-variant-numeric: tabular-nums; }
+    .block p { margin-bottom: 0; }
+    .list { max-width: 75ch; padding-left: var(--space-6); }
+    .list li + li { margin-top: var(--space-3); }
+    .footer { border-top: 1px solid var(--line); padding: var(--space-8) 0; color: var(--muted); }
+    @media (max-width: 760px) {
+      .bar { align-items: flex-start; flex-direction: column; padding: var(--space-3) var(--space-4); }
+      nav { width: 100%; }
+      nav a { padding: 0 var(--space-2); }
+      main { padding: 0 var(--space-4) var(--space-12); }
+      .hero, .section-head, .step, .timeline, .impact, .readiness, .image-grid, .decision-grid, .checkpoint-grid, .glossary, .route-band { grid-template-columns: 1fr; gap: var(--space-6); }
+      .hero, section { padding: var(--space-12) 0; }
+      .hero { min-height: 0; }
+      .hero-visual img { height: 260px; }
+      .bar { position: static; }
+      section, #top { scroll-margin-top: 132px; }
+      nav { overflow-x: auto; flex-wrap: nowrap; }
+      nav a { white-space: nowrap; }
+      .lightbox-stage { height: calc(100dvh - 164px); }
+      h1 { max-width: none; }
+    }
+    @media (max-width: 420px) {
+      h1 { font-size: 2.25rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .action, figure img, .progress-track i { transition: none; }
+      .action:hover, .action:active, figure a:hover img { transform: none; }
+    }
+    @media print {
+      nav, .action, .lightbox { display: none; }
+      body { background: var(--surface); }
+      main { max-width: none; }
+      .step { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Đến nội dung chính</a>
+  <header>
+    <div class="bar">
+      <a class="brand" href="#top"><b>D5</b> SEGMENTATION LAB</a>
+      <nav aria-label="Mục lục">
+        <a href="#start">Bắt đầu</a>
+        <a href="#data">Dữ liệu</a>
+        <a href="#cvat">CVAT từng bước</a>
+        <a href="#quality">Tự kiểm</a>
+        <a href="#self-score">Giờ cuối</a>
+        <a href="#submit">Nộp bài</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <div class="hero" id="top">
+      <div>
+        <p class="eyebrow">Day 5 · 240 phút trên lớp · nộp link trong 24 giờ</p>
+        <h1>Nhìn thấy gì.<br><span>Vẽ đúng phần đó.</span></h1>
+        <p class="lead">Ba loại segmentation, sáu ca khó, một kỹ năng chung: tự quyết định ranh giới, phát hiện lỗi và giải thích cách sửa.</p>
+        <div class="hero-linkrow"><a class="action" href="#start">Bắt đầu từ đây</a><a class="action secondary" href="#cvat">Xem CVAT từng bước</a></div>
+      </div>
+      <figure class="hero-visual"><img src="data/tiers/medium_instance/images/000000458325.jpg" alt="Ảnh dữ liệu thật của chặng Medium: nhiều vật thể đường phố cần tách thành từng instance" loading="eager"><figcaption><strong>Ảnh thật của bài, chưa có mask</strong><span>Bạn không chép đường viền có sẵn. Bạn tạo, kiểm và bảo vệ quyết định của mình.</span></figcaption></figure>
+    </div>
+
+    <ol class="route-band" aria-label="Hành trình Day 5">
+      <li><strong>Nhận diện vùng</strong><span>Easy semantic</span><small>3 ảnh · 20 điểm</small></li>
+      <li><strong>Tách từng vật</strong><span>Medium instance</span><small>3 ảnh · 32 điểm</small></li>
+      <li><strong>Ghép toàn cảnh</strong><span>Hard panoptic + sáu checkpoint</span><small>8 ảnh · 48 điểm</small></li>
+    </ol>
+
+    <section id="payoff" aria-labelledby="payoff-title">
+      <div class="section-head"><h2 id="payoff-title">Vì sao lab này đáng làm?</h2><p>Đường biên lệch vài pixel có thể che một lỗi lớn hơn: sai class, gộp hai vật hoặc bỏ sót vùng. Bạn học cách nhìn ra nguyên nhân, không chỉ tô cho kín.</p></div>
+      <div class="impact"><p>Đến cuối buổi, bạn có thể chỉ vào một vùng khó và nói: “Tôi vẽ như vậy vì quy tắc nào, đã kiểm lỗi gì, đã sửa ra sao.”</p><div class="impact-list"><article><b>01</b><div><h3>Phân biệt ba loại mask</h3><p>Semantic hỏi vùng thuộc lớp nào; instance hỏi vật nào; panoptic cần cả hai.</p></div></article><article><b>02</b><div><h3>Bắt lỗi như người kiểm chất lượng</h3><p>Kiểm thiếu/thừa vật, gộp/tách sai, biên ăn nền và vùng chưa phủ.</p></div></article><article><b>03</b><div><h3>Để lại bằng chứng có thể xem lại</h3><p>ZIP export, một lần sửa lỗi và ba ca cần cân nhắc trong report.</p></div></article></div></div>
+    </section>
+
+    <section id="start" aria-labelledby="start-title">
+      <div class="section-head"><h2 id="start-title">Bắt đầu trong 5 phút</h2><p>Không cần Python hoặc notebook. Mọi người fork cùng một repo đề bài, làm cùng bộ task và cùng thang 100 điểm; người mới dùng ảnh hướng dẫn, người quen CVAT có thể đi nhanh hơn.</p></div>
+      <div class="readiness"><div class="check-panel"><h3>Kiểm trước khi vẽ</h3>
+        <label><input type="checkbox" data-check><span><strong>Tôi đã fork repo đề bài vào GitHub của mình.</strong><small>Mở fork của chính bạn; sau này push bài lên đây và nộp link trên VLearn.</small></span></label>
+        <label><input type="checkbox" data-check><span><strong>Tôi vào được CVAT local của lớp.</strong><small>Nếu lỗi đăng nhập hoặc địa chỉ, chụp màn hình và báo coach.</small></span></label>
+        <label><input type="checkbox" data-check><span><strong>Tôi mở đúng task và đúng số ảnh.</strong><small>Bắt đầu với <code>easy_semantic</code>, ba JPG trong thư mục của task.</small></span></label>
+        <label><input type="checkbox" data-check><span><strong>Tôi đã đọc classes.json của task.</strong><small>Tên lớp phải trùng từng chữ, kể cả dấu cách.</small></span></label>
+        <label><input type="checkbox" data-check><span><strong>Tôi biết Save và export nằm ở đâu.</strong><small>Nhìn ảnh chụp phía dưới; nếu vẫn không thấy, hỏi coach trước khi làm nhiều ảnh.</small></span></label>
+        <div class="progress">Đã sẵn sàng: <span data-progress-label>0/5</span><span class="progress-track"><i data-progress-bar></i></span></div>
+      </div><aside class="rule-card"><h3>Một quy tắc cho cả lớp</h3><p>Trước khi xem bất kỳ gợi ý tự động nào ở Medium, tự vẽ một object và ghi lại vì sao bạn chọn class, đường biên đó.</p><p>Không thấy SAM thì dùng Brush/Polygon. Việc này không làm mất khả năng hoàn thành bài.</p><a href="guideline-mini-sheet.md">Mở phiếu quy tắc ngắn</a></aside></div>
+    </section>
+
+    <section id="mission" aria-labelledby="mission-title">
+      <div class="section-head">
+        <h2 id="mission-title">Bài làm của bạn</h2>
+        <p>Giữ nguyên cấu trúc starter: ba cấp độ và sáu checkpoint, tổng 14 ảnh và tối đa 100 điểm. Không có bài bắt buộc về nhà.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Task</th><th>Ảnh</th><th>Cần vẽ</th><th>Export</th><th>Điểm tối đa</th></tr></thead>
+          <tbody>
+            <tr><td><code>easy_semantic</code></td><td>3</td><td>Vùng road, sidewalk, building, vegetation, sky</td><td>Segmentation mask 1.1</td><td>20</td></tr>
+            <tr><td><code>medium_instance</code></td><td>3</td><td>Mỗi người/xe là một mask riêng</td><td>COCO 1.0</td><td>32</td></tr>
+            <tr><td><code>hard_panoptic</code></td><td>2</td><td>Stuff + từng thing</td><td>COCO 1.0</td><td>30</td></tr>
+            <tr><td><code>cp1_holes</code>, <code>cp2_slice</code>, <code>cp5_occlusion</code></td><td>1 mỗi trạm</td><td>Lỗ/kính, hai vật sát nhau, vật bị che</td><td>COCO 1.0</td><td>9</td></tr>
+            <tr><td><code>cp3_thin</code>, <code>cp4_curb</code>, <code>cp6_coverage</code></td><td>1 mỗi trạm</td><td>Nét mảnh, bó vỉa, phủ vùng</td><td>Segmentation mask 1.1</td><td>9</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Ảnh chụp CVAT bên dưới dùng để chỉ vị trí nút bấm. Ảnh xe và lớp hiện trong screenshot chỉ là ví dụ giao diện, không phải ảnh hoặc lớp của bài chấm. Hãy dùng đúng ảnh và <code>classes.json</code> trong repo này.</p>
+    </section>
+
+    <section id="data" aria-labelledby="data-title">
+      <div class="section-head"><h2 id="data-title">Nhìn dữ liệu trước khi vẽ</h2><p>Đây là ảnh thật trong repo học viên, chưa có mask hoặc đường viền đáp án. Bấm ảnh để mở lớn. Ở mỗi task, chỉ dùng ảnh trong thư mục <code>images/</code> của task đó.</p></div>
+      <div class="image-grid">
+        <figure class="data-card"><a href="data/tiers/easy_semantic/images/81ae7cbb-6bc63a4a.jpg" data-lightbox><img src="data/tiers/easy_semantic/images/81ae7cbb-6bc63a4a.jpg" alt="Một ảnh thật của task Easy semantic, chưa có vùng mask" loading="lazy"></a><figcaption><strong>Easy · semantic</strong><span>Đi tìm ranh giữa những vùng như road, sidewalk và building.</span></figcaption></figure>
+        <figure class="data-card"><a href="data/tiers/medium_instance/images/000000458325.jpg" data-lightbox><img src="data/tiers/medium_instance/images/000000458325.jpg" alt="Một ảnh thật của task Medium instance, chưa có object mask" loading="lazy"></a><figcaption><strong>Medium · instance</strong><span>Đếm từng person hoặc vehicle; hai vật cùng class vẫn tách riêng.</span></figcaption></figure>
+        <figure class="data-card"><a href="data/tiers/hard_panoptic/images/000000460147.jpg" data-lightbox><img src="data/tiers/hard_panoptic/images/000000460147.jpg" alt="Một ảnh thật của task Hard panoptic, chưa có mask" loading="lazy"></a><figcaption><strong>Hard · panoptic</strong><span>Giữ cả stuff của khung cảnh và từng thing có thể đếm.</span></figcaption></figure>
+      </div>
+      <div class="decision-grid"><article><b>Semantic</b><h3>“Vùng này là gì?”</h3><p>Mỗi pixel thuộc một lớp vùng. Ví dụ road và sidewalk khác chức năng dù màu gần giống.</p></article><article><b>Instance</b><h3>“Vật này là chiếc nào?”</h3><p>Hai xe cùng lớp là hai instance. Đừng gộp thành một mask chỉ vì đứng sát nhau.</p></article><article><b>Panoptic</b><h3>“Cả cảnh gồm những gì?”</h3><p>Stuff như road/sky cùng tồn tại với từng thing như car #1, car #2.</p></article></div>
+      <div class="case-practice"><h3>Tự đoán trước khi mở lời giải thích</h3><p>Ba tình huống nguyên tắc, không phải gold mask của ảnh chấm. Nhấn vào câu hỏi sau khi bạn đã tự chọn cách làm.</p>
+        <details><summary>Hai xe cùng class đứng sát nhau. Một mask hay hai?</summary><p>Với instance, mỗi xe là một object riêng. Kiểm khe và biên giữa chúng; đừng gộp vì cùng class hoặc vì công cụ đề xuất chung một vùng.</p></details>
+        <details><summary>Thân xe bị cột che. Có tô nối qua phần khuất?</summary><p>Chỉ vẽ pixel nhìn thấy, không đoán biên sau cột. Đó vẫn có thể là một instance với các mảng nhìn thấy rời nhau theo quy tắc task.</p></details>
+        <details><summary>Road và sidewalk gần cùng màu. Chọn class bằng gì?</summary><p>Dựa vào chức năng và dấu hiệu ranh như bó vỉa, không chỉ màu. Nếu ảnh không đủ bằng chứng, ghi vị trí và hai cách hiểu vào report.</p></details>
+      </div>
+      <p class="note">Ảnh phóng lớn chỉ để quan sát. Nó không cung cấp gold mask. Nếu vùng mờ hoặc bị che, ghi lại điều bạn chắc và câu hỏi còn thiếu, không vẽ phần khuất theo phỏng đoán.</p>
+    </section>
+
+    <section id="cvat" aria-labelledby="cvat-title">
+      <div class="section-head">
+        <h2 id="cvat-title">CVAT local, từng cú nhấp</h2>
+        <p>Không cần coach thị phạm trực tiếp. Theo ảnh chụp giao diện thật, làm một bước rồi kiểm dòng “Đã đúng khi”. Bấm ảnh, chọn “Phóng 100%” rồi kéo trong khung để đọc nút nhỏ. Tên task trong screenshot chỉ minh họa, không phải task cần nộp.</p>
+      </div>
+
+      <article class="step">
+        <div><p class="number">01 / Tìm task</p><h3>Vào đúng bài của bạn</h3><p>Đăng nhập CVAT local, mở <strong>Tasks</strong>. Nếu coach đã tạo task, tìm đúng tên, bấm <strong>Open</strong>, không tạo bản thứ hai. Nếu lớp yêu cầu bạn tự tạo, bấm dấu <strong>+</strong> và sang bước 2.</p><p><strong>Đã đúng khi:</strong> tên task trên CVAT trùng mã trong bảng bài làm.</p></div>
+        <figure><a href="docs/images/02-tasks.png" data-lightbox><img src="docs/images/02-tasks.png" alt="Danh sách Tasks trên CVAT local với nút Open và dấu cộng tạo task" loading="lazy"></a><figcaption>Ảnh 1. Chỉ nhìn thanh Tasks, nút Open ở dòng đầu và dấu +. Các task hoặc dòng lỗi khác trong ảnh không thuộc bài Day 5 này.</figcaption></figure>
+      </article>
+
+      <article class="step">
+        <div><p class="number">02 / Tạo nếu cần</p><h3>Đặt tên, nạp đúng ảnh</h3><p>Chỉ khi chưa có task: chọn <strong>Create new task</strong>. Điền Name bằng mã task, ví dụ <code>easy_semantic</code>. Trong <strong>Select files → My computer</strong>, chọn đúng ba JPG ở <code>data/tiers/easy_semantic/images/</code>. Không trộn ảnh của hai task.</p><p><strong>Đã đúng khi:</strong> số ảnh và tên task khớp bảng trên, trước khi bấm Submit.</p></div>
+        <figure><a href="docs/images/03-task-form.png" data-lightbox><img src="docs/images/03-task-form.png" alt="Biểu mẫu Create a new task của CVAT local với Name, Labels và Select files" loading="lazy"></a><figcaption>Ảnh 2. Name ở trên, Labels ở giữa, Select files ở dưới.</figcaption></figure>
+      </article>
+
+      <article class="step">
+        <div><p class="number">03 / Labels</p><h3>Dán nhãn đúng task vào CVAT</h3><p>Cách nhanh: mở file <code>cvat-labels.json</code> của đúng task bên dưới, chọn toàn bộ nội dung từ dấu <code>[</code> đầu đến <code>]</code> cuối (Mac: ⌘A → ⌘C; Windows: Ctrl+A → Ctrl+C). Trong CVAT chọn <strong>Labels → Raw</strong>, xóa chữ cũ, dán vào ô Raw rồi bấm <strong>Done</strong>. <strong>Không dán classes.json</strong>: đó là metadata của bài lab, không phải định dạng Raw. Cách khác: dùng <strong>Constructor → Add label</strong>, gõ từng tên trong <code>classes.json</code> và Continue.</p><p><a href="data/tiers/easy_semantic/cvat-labels.json">Easy</a> · <a href="data/tiers/medium_instance/cvat-labels.json">Medium</a> · <a href="data/tiers/hard_panoptic/cvat-labels.json">Hard</a><br><a href="data/checkpoints/cp1_holes/cvat-labels.json">CP1</a> · <a href="data/checkpoints/cp2_slice/cvat-labels.json">CP2</a> · <a href="data/checkpoints/cp3_thin/cvat-labels.json">CP3</a> · <a href="data/checkpoints/cp4_curb/cvat-labels.json">CP4</a> · <a href="data/checkpoints/cp5_occlusion/cvat-labels.json">CP5</a> · <a href="data/checkpoints/cp6_coverage/cvat-labels.json">CP6</a></p><p><strong>Đã đúng khi:</strong> số và tên label trong CVAT trùng task đang làm; <code>traffic sign</code> có dấu cách. Nếu task đã có annotation hoặc coach tạo sẵn, chỉ kiểm, <strong>không dán đè Raw</strong>.</p></div>
+        <figure><a href="docs/images/04-label.png" data-lightbox><img src="docs/images/04-label.png" alt="Ô Label name và nút Continue trên CVAT local" loading="lazy"></a><figcaption>Ảnh 3. Nhập Label name, Continue, rồi lặp lại cho class tiếp theo.</figcaption></figure>
+      </article>
+
+      <article class="step">
+        <div><p class="number">04 / Mở Job</p><h3>Tìm ảnh và bảng Objects</h3><p>Trong trang task, kéo đến <strong>Jobs</strong> và bấm Job được giao. Trong editor, công cụ vẽ ở trái, ảnh ở giữa, Save và chuyển ảnh ở trên, Objects/Labels ở phải. Đọc tên ảnh đang hiện trước khi vẽ.</p><p><strong>Đã đúng khi:</strong> bạn nói được “tôi đang ở task nào, ảnh nào” và thấy tab Objects.</p></div>
+        <div><figure><a href="docs/images/05-task-jobs.png" data-lightbox><img src="docs/images/05-task-jobs.png" alt="Vùng Jobs trên trang task CVAT local" loading="lazy"></a><figcaption>Ảnh 4. Bấm Job của bạn; số Job trong ảnh minh họa có thể khác.</figcaption></figure><figure><a href="docs/images/06-editor.png" data-lightbox><img src="docs/images/06-editor.png" alt="Bố cục editor CVAT: công cụ trái, ảnh giữa, Save trên cùng và Objects bên phải" loading="lazy"></a><figcaption>Ảnh 5. Bố cục editor; ảnh screenshot không phải đáp án của bài.</figcaption></figure></div>
+      </article>
+
+      <article class="step">
+        <div><p class="number">05 / Polygon</p><h3>Đặt điểm quanh phần nhìn thấy</h3><p>Chọn <strong>Polygon</strong> bên trái, chọn Label đúng rồi bấm <strong>Shape</strong> (không chọn Track). Nhấp các điểm quanh biên vật nhìn thấy. Gặp cây hoặc cột che khuất thì dừng ở phần bị che; không đoán đường biên phía sau.</p><p><strong>Đã đúng khi:</strong> Objects có thêm một shape với class đúng. Ở Medium, đây có thể là object đầu bạn tự làm để ghi vào report.</p></div>
+        <figure><a href="docs/images/07-polygon.png" data-lightbox><img src="docs/images/07-polygon.png" alt="Công cụ Polygon của CVAT local, chọn Label và Shape" loading="lazy"></a><figcaption>Ảnh 6. Kiểm Label và chọn Shape trước khi đặt các điểm.</figcaption></figure>
+      </article>
+
+      <article class="step">
+        <div><p class="number">06 / Brush</p><h3>Tô, xóa phần lấn và chốt mask</h3><p>Chọn <strong>Brush/Mask</strong>, chọn Label rồi bấm <strong>Shape</strong>. Tô vùng nhìn thấy; phóng to và dùng Eraser nếu nét ăn vào nền. Kết thúc hình đang tô theo nút trên thanh Brush, rồi bấm <strong>Save</strong> của Job trên thanh trên. Đây là hai thao tác khác nhau.</p><p><strong>Đã đúng khi:</strong> mask hiện trong Objects, class đúng; chuyển ảnh rồi quay lại vẫn thấy mask đã lưu.</p></div>
+        <figure><a href="docs/images/08-brush.jpg" data-lightbox><img src="docs/images/08-brush.jpg" alt="Công cụ Draw new mask trên CVAT local với lựa chọn Label và Shape" loading="lazy"></a><figcaption>Ảnh 7. Brush/Mask trên thanh trái; vùng Eraser chỉ hiện sau khi bắt đầu thao tác.</figcaption></figure>
+      </article>
+
+      <article class="step">
+        <div><p class="number">07 / Hỗ trợ nếu có</p><h3>Đề xuất không thay quyết định</h3><p>Chỉ thử công cụ gợi ý sau object tự làm ở Medium. Nếu tài khoản có Intelligent Scissors, mở OpenCV và chọn biểu tượng kéo. Nếu không thấy, quay về Brush/Polygon. SAM không được bảo đảm có trên CVAT lớp; không chờ cài model mới.</p><p><strong>Đã đúng khi:</strong> bạn đã so đề xuất với ảnh thật, tự sửa hoặc nói rõ lý do giữ. Không coi mask máy là đáp án.</p></div>
+        <figure><a href="docs/images/09-opencv.jpg" data-lightbox><img src="docs/images/09-opencv.jpg" alt="Bảng OpenCV Drawing trên CVAT local và công cụ Intelligent Scissors" loading="lazy"></a><figcaption>Ảnh 8. Scissors chỉ là lựa chọn phụ nếu máy bạn có; Brush/Polygon luôn là đường làm chính.</figcaption></figure>
+      </article>
+
+      <article class="step">
+        <div><p class="number">08 / Export</p><h3>Save rồi chọn format theo task</h3><p>Bấm <strong>Save</strong>, mở <strong>Menu → Export job dataset</strong>. Easy và checkpoint semantic chọn <strong>Segmentation mask 1.1</strong>; Medium, Hard và checkpoint instance chọn <strong>COCO 1.0</strong>. Tải ZIP rồi đổi tên file bên ngoài thành <code>&lt;mã_task&gt;.zip</code>; không sửa JSON hoặc PNG bên trong.</p><p><strong>Đã đúng khi:</strong> ZIP có đúng tên task, mở được và đúng format. Nếu không thấy format hoặc export lỗi, giữ bản Save, chụp lỗi và báo coach.</p></div>
+        <div><figure><a href="docs/images/10-export-menu.jpg" data-lightbox><img src="docs/images/10-export-menu.jpg" alt="Menu Job của CVAT local có Export job dataset" loading="lazy"></a><figcaption>Ảnh 9. Menu → Export job dataset. Không bấm Remove annotations.</figcaption></figure><figure><a href="docs/images/12-format-list.jpg" data-lightbox><img src="docs/images/12-format-list.jpg" alt="Danh sách format export của CVAT local đang hiển thị COCO 1.0; các format khác ở phần cuộn bên dưới" loading="lazy"></a><figcaption>Ảnh 10. COCO 1.0 đang hiện trong danh sách. Với semantic, cuộn tiếp để tìm Segmentation mask 1.1; nếu không có, báo coach.</figcaption></figure></div>
+      </article>
+    </section>
+
+    <section id="schedule" aria-labelledby="schedule-title">
+      <div class="section-head"><h2 id="schedule-title">240 phút, có điểm dừng rõ</h2><p>Giữ hai lần nghỉ và thời gian tự QC. Đây là timebox thực hành, không phải hạn nộp ngay trong lớp; nếu chưa xong, ghi đúng phần đã làm và phần còn thiếu.</p></div>
+      <div class="timeline">
+        <div class="block"><strong>0–15</strong><h3>Mở môi trường</h3><p>Vào CVAT, đọc quy tắc, tạo hoặc tìm Easy; kiểm ba ảnh và năm class.</p></div>
+        <div class="block"><strong>15–45</strong><h3>Easy semantic</h3><p>Tô vùng, so ranh road/sidewalk, Save và export.</p></div>
+        <div class="block"><strong>45–110</strong><h3>Medium instance</h3><p>Tự vẽ object đầu, làm ba ảnh, kiểm gộp/tách và export COCO.</p></div>
+        <div class="block"><strong>110–120</strong><h3>Nghỉ</h3><p>Giữ an toàn ZIP đã xuất.</p></div>
+        <div class="block"><strong>120–175</strong><h3>Hard panoptic</h3><p>Vẽ stuff và từng thing trên hai ảnh, kiểm rồi export.</p></div>
+        <div class="block"><strong>175–185</strong><h3>Nghỉ</h3><p>Ground truth ba tier được phát từ phút 180 theo hướng dẫn lớp; không đưa đáp án lên fork.</p></div>
+        <div class="block"><strong>185–215</strong><h3>Checkpoint và tự đánh giá</h3><p>Mỗi task một ảnh, đúng classes.json. Người xong sớm có thể chạy scorer của repo gốc với reference mới nhận.</p></div>
+        <div class="block"><strong>215–240</strong><h3>QC, report, chuẩn bị push</h3><p>Kiểm ZIP, điền report, Save lần cuối và ghi lỗi cần báo coach. Nộp link fork trên VLearn trong 24 giờ sau buổi lab.</p></div>
+      </div>
+    </section>
+
+    <section id="checkpoints" aria-labelledby="checkpoints-title">
+      <div class="section-head"><h2 id="checkpoints-title">Sáu ca, sáu câu hỏi</h2><p>Mỗi ca chỉ có một ảnh và 3 điểm, nhưng buộc bạn dùng đúng quy tắc. Nhấp ảnh để quan sát lớn; ảnh chưa có mask mẫu.</p></div>
+      <div class="checkpoint-grid">
+        <a href="data/checkpoints/cp1_holes/images/000000144300.jpg" data-lightbox><img src="data/checkpoints/cp1_holes/images/000000144300.jpg" alt="Ảnh thật checkpoint cp1_holes, chưa có mask" loading="lazy"><span><strong>cp1_holes · instance</strong><small>Kính hoặc khe có nên bị khoét khỏi mask vật?</small></span></a>
+        <a href="data/checkpoints/cp2_slice/images/000000017627.jpg" data-lightbox><img src="data/checkpoints/cp2_slice/images/000000017627.jpg" alt="Ảnh thật checkpoint cp2_slice, chưa có mask" loading="lazy"><span><strong>cp2_slice · instance</strong><small>Hai vật sát nhau có bị gộp thành một?</small></span></a>
+        <a href="data/checkpoints/cp5_occlusion/images/000000336232.jpg" data-lightbox><img src="data/checkpoints/cp5_occlusion/images/000000336232.jpg" alt="Ảnh thật checkpoint cp5_occlusion, chưa có mask" loading="lazy"><span><strong>cp5_occlusion · instance</strong><small>Vật bị che còn là mấy instance?</small></span></a>
+        <a href="data/checkpoints/cp3_thin/images/839f7736-abe28069.jpg" data-lightbox><img src="data/checkpoints/cp3_thin/images/839f7736-abe28069.jpg" alt="Ảnh thật checkpoint cp3_thin, chưa có mask" loading="lazy"><span><strong>cp3_thin · semantic</strong><small>Nét mảnh nào dễ bị bỏ sót hoặc tô tràn?</small></span></a>
+        <a href="data/checkpoints/cp4_curb/images/7d83710e-4697c3b2.jpg" data-lightbox><img src="data/checkpoints/cp4_curb/images/7d83710e-4697c3b2.jpg" alt="Ảnh thật checkpoint cp4_curb, chưa có mask" loading="lazy"><span><strong>cp4_curb · semantic</strong><small>Ranh road/sidewalk nằm ở đâu khi màu gần giống?</small></span></a>
+        <a href="data/checkpoints/cp6_coverage/images/7daa6479-67988f3f.jpg" data-lightbox><img src="data/checkpoints/cp6_coverage/images/7daa6479-67988f3f.jpg" alt="Ảnh thật checkpoint cp6_coverage, chưa có mask" loading="lazy"><span><strong>cp6_coverage · semantic</strong><small>Vùng thuộc class của task còn trống ở đâu?</small></span></a>
+      </div>
+      <p class="note">Mỗi checkpoint có <code>classes.json</code> riêng. Không dùng danh sách class của Easy hay Medium cho cả sáu ca.</p>
+    </section>
+
+    <section id="quality" aria-labelledby="quality-title">
+      <div class="section-head"><h2 id="quality-title">Tự kiểm như người làm QC</h2><p>Trước khi export, đi một vòng theo thứ tự dưới đây. Phần tự kiểm bằng notebook là tùy chọn; chất lượng quyết định vẫn nằm ở việc bạn xem lại ảnh và mask.</p></div>
+      <div class="impact"><p>Đúng ảnh → đúng class → đủ vùng/vật → đúng biên → không gộp/tách nhầm → Save → ZIP đúng format.</p><div class="impact-list"><article><b>01</b><div><h3>Nhìn lại ảnh gốc</h3><p>Đừng chỉ xem lớp màu. Phóng to mép vật, vật che và nét mảnh.</p></div></article><article><b>02</b><div><h3>Đếm và đối chiếu Objects</h3><p>Số object trong CVAT là số bạn đã tạo, chưa phải số đúng. Kiểm bằng mắt từng ảnh.</p></div></article><article><b>03</b><div><h3>Sửa rồi Save/export lại</h3><p>Ghi một lỗi thật và hành động sửa vào report. Nếu không sửa được, ghi vướng mắc cụ thể.</p></div></article></div></div>
+      <div class="timeline">
+        <div class="block"><strong>Không dùng code</strong><h3>Kiểm trong CVAT</h3><p>Mở lần lượt ảnh, kiểm class, số vật và ranh giới; Save, export đúng format và mở thử ZIP.</p></div>
+        <div class="block"><strong>Colab hoặc Jupyter · tùy chọn</strong><h3>Một notebook tự kiểm</h3><p><a href="notebooks/day5-segmentation-tu-kiem.ipynb" download>Tải một file notebook</a> rồi <a href="notebooks/README.md">xem cách mở trên Colab và bước kiểm/cài thư viện</a> để kiểm ảnh, mask, số object đã nộp và ZIP. Notebook không có đáp án, không tạo điểm.</p></div>
+      </div>
+      <p class="note">Nếu có Python 3 nhưng không có Jupyter, xem <a href="docs/SUBMISSION.md">lệnh kiểm ZIP và hướng dẫn nộp</a>. Dòng “OK” chỉ xác nhận cấu trúc export, không chứng minh mask đúng. IoU giữa hai bản nhãn chỉ là độ giống nhau khi chưa có reference phù hợp.</p>
+      <div id="self-score" class="quickstart" aria-labelledby="self-score-title">
+        <h3 id="self-score-title">Giờ cuối: GitHub tự đánh giá bài đã push</h3>
+        <ol>
+          <li><strong>Trước khi mở ground truth:</strong> Save/export ba ZIP Easy, Medium, Hard của chính bạn. Người phụ trách cần thông báo cách ghi nhận bản trước khi phát đáp án nếu xét top 3.</li>
+          <li><strong>Trên fork GitHub:</strong> vào tab <strong>Actions</strong>, bật workflow nếu GitHub hỏi. Upload ZIP vào <code>submissions/</code> rồi Commit. Mở <strong>Actions → Day 5 self-check → lần chạy mới nhất → Summary</strong>. Mỗi lần sửa trong CVAT, Save/export và push ZIP mới, action chạy lại; cũng có thể bấm <strong>Run workflow</strong>.</li>
+          <li><strong>Sau khi đáp án được phát:</strong> nếu gói ground truth đã được công bố ở release chính thức, Summary hiện điểm Easy + Medium + Hard tối đa <strong>82</strong>. Nếu chỉ thấy kiểm cấu trúc và báo chưa có reference, chờ người phụ trách phát release hoặc dùng cách dự phòng bên dưới. Không upload đáp án lên fork.</li>
+        </ol>
+        <details><summary>Nếu cần chạy script trên máy thay GitHub Actions</summary>
+        <p>Giải nén reference được phát theo cấu trúc <code>data/tiers/&lt;task&gt;/groundtruth/</code> trên máy. Mở Terminal tại thư mục gốc repo đã tải về; trên Windows thay <code>python3</code> bằng <code>py -3</code>.</p>
+        <pre class="command"><code>python3 -m pip install -r requirements.txt
+python3 scoring/score.py easy_semantic submissions/easy_semantic.zip --group tiers
+python3 scoring/score.py medium_instance submissions/medium_instance.zip --group tiers
+python3 scoring/score.py hard_panoptic submissions/hard_panoptic.zip --group tiers
+python3 scoring/scorecard.py --group tiers --dir submissions --out reports/tiers</code></pre>
+        <p>Mở <code>reports/tiers/SCORECARD.md</code> sau khi lệnh cuối chạy xong.</p></details>
+        <p>Nếu một class/vật bị sai, sửa trong CVAT → Save → export lại → push ZIP mới; ghi một lỗi thật vào <code>REPORT.md</code>. Chưa có reference hoặc Action lỗi thì tiếp tục bài cốt lõi và báo coach. <a href="docs/SELF_SCORING.md">Mở hướng dẫn từng nút, cách đọc metric và xử lý lỗi</a>.</p>
+        <p class="note">Scorer không tự in PASS hay top 3. Theo thông báo lớp, bonus report đạt yêu cầu là 10, top 3 độ chính xác là 20; điểm ghi nhận vẫn tối đa 100, không tự cộng hai mức. Người phụ trách xác nhận tiêu chí PASS và bản xét xếp hạng. Độ giống cao sau khi đáp án được phát không chứng minh đã tự làm trước đó.</p>
+      </div>
+    </section>
+
+    <section id="submit" aria-labelledby="submit-title">
+      <div class="section-head"><h2 id="submit-title">Fork → push → nộp link</h2><p>Repo đề bài là public. Mỗi bạn nộp link fork cá nhân trên VLearn trong vòng 24 giờ sau buổi lab; tool riêng chấm sau cửa sổ nộp. Không cần Python hoặc tự chấm.</p></div>
+      <ol class="list">
+        <li>Trên GitHub, bấm <strong>Fork</strong> ở repo đề bài để tạo fork trên tài khoản của bạn. Dùng ảnh và class trong fork để làm bài trên CVAT.</li>
+        <li>Kiểm ZIP export: tên đúng mã task, mở được và có dữ liệu. Mở <a href="REPORT.md"><code>REPORT.md</code> đã có sẵn ở gốc fork</a>; ghi một quyết định tự làm, một lỗi và ba ca cân nhắc. <a href="reports/REPORT_TEMPLATE.md">Mẫu giải thích</a> giúp bạn hiểu từng ô.</li>
+        <li>Trong fork, mở <code>REPORT.md</code> → <strong>Edit → Commit changes</strong>. Mở <code>submissions/</code> → <strong>Add file → Upload files</strong> để đưa ZIP vào đó rồi Commit. Dùng Git trên máy để push cũng được, nhưng không bắt buộc.</li>
+        <li>Mở lại fork, kiểm file đã hiện rồi dán <strong>link fork của bạn</strong> vào VLearn trong vòng 24 giờ sau buổi lab. Đừng dán link repo đề bài của lớp. Nếu export lỗi, ghi tình trạng Save và báo coach. <a href="docs/SUBMISSION.md">Xem cách nộp chi tiết</a>.</li>
+      </ol>
+      <p class="note">Rubric cốt lõi là 100 và điểm ghi nhận không vượt 100 dù có bonus giờ cuối. Hạn 24 giờ là cửa sổ nhận bài, không có bài tập về nhà bắt buộc. Không đưa ground truth lên fork. IoU giữa hai mask chỉ là độ giống nhau nếu chưa có reference; bạn không tự xác nhận PASS hay top 3.</p>
+    </section>
+    <section id="glossary" aria-labelledby="glossary-title">
+      <div class="section-head"><h2 id="glossary-title">Sáu từ đủ để bắt đầu</h2><p>Không cần thuộc định nghĩa trước khi vào CVAT. Quay lại đây khi gặp một từ lạ trong task hoặc report.</p></div>
+      <dl class="glossary"><div><dt>Mask</dt><dd>Vùng pixel bạn gán cho một lớp hoặc một vật. Bounding box hình chữ nhật không thay cho mask.</dd></div><div><dt>Class</dt><dd>Tên loại vùng/vật. Lấy đúng chữ từ <code>classes.json</code> của task.</dd></div><div><dt>Instance</dt><dd>Một vật riêng có thể đếm, như xe thứ nhất và xe thứ hai dù cùng class.</dd></div><div><dt>Stuff</dt><dd>Vùng nền không đếm từng cá thể, như road hoặc sky.</dd></div><div><dt>Thing</dt><dd>Vật có thể đếm từng cá thể, như car hoặc person.</dd></div><div><dt>Export</dt><dd>File ZIP CVAT tạo ra sau khi bạn Save; mỗi task có format riêng.</dd></div></dl>
+    </section>
+    <div class="footer">Day 5 Segmentation Data Lab. Ảnh và taxonomy bài làm lấy từ starter Day 5 commit <code>3bff13d</code>; ảnh giao diện lấy từ CVAT local dùng để hướng dẫn thao tác.</div>
+  </main>
+  <dialog class="lightbox" aria-label="Xem ảnh kích thước lớn" data-dialog>
+    <div class="lightbox-head"><strong data-image-title>Ảnh bài lab</strong><div><button type="button" data-zoom aria-pressed="false">Phóng 100%</button> <button type="button" data-close>Đóng ảnh</button></div></div>
+    <div class="lightbox-stage"><img data-image alt=""></div><p class="lightbox-caption" data-caption></p>
+  </dialog>
+  <script>
+    (() => {
+      const checks = [...document.querySelectorAll('[data-check]')];
+      const progress = document.querySelector('[data-progress-label]');
+      const bar = document.querySelector('[data-progress-bar]');
+      const key = 'day5-student-preflight-v2';
+      try {
+        const saved = JSON.parse(localStorage.getItem(key) || '[]');
+        checks.forEach((box, index) => { box.checked = Boolean(saved[index]); });
+      } catch (_) { /* Private browsing may block storage; checklist still works. */ }
+      const update = () => {
+        const done = checks.filter((box) => box.checked).length;
+        progress.textContent = `${done}/${checks.length}`;
+        bar.style.width = `${100 * done / checks.length}%`;
+        try { localStorage.setItem(key, JSON.stringify(checks.map((box) => box.checked))); } catch (_) { /* Keep local-only interaction usable. */ }
+      };
+      checks.forEach((box) => box.addEventListener('change', update));
+      update();
+
+      const dialog = document.querySelector('[data-dialog]');
+      const image = document.querySelector('[data-image]');
+      const title = document.querySelector('[data-image-title]');
+      const caption = document.querySelector('[data-caption]');
+      const zoom = document.querySelector('[data-zoom]');
+      let trigger = null;
+      document.querySelectorAll('[data-lightbox]').forEach((link) => link.addEventListener('click', (event) => {
+        if (!dialog.showModal) return;
+        event.preventDefault();
+        trigger = link;
+        image.src = link.href;
+        image.alt = link.querySelector('img')?.alt || 'Ảnh phóng lớn';
+        title.textContent = link.querySelector('strong')?.textContent || 'Ảnh CVAT local';
+        caption.textContent = link.closest('figure')?.querySelector('figcaption')?.innerText || link.querySelector('span')?.innerText || image.alt;
+        dialog.classList.remove('zoomed');
+        zoom.setAttribute('aria-pressed', 'false');
+        zoom.textContent = 'Phóng 100%';
+        dialog.showModal();
+      }));
+      zoom.addEventListener('click', () => {
+        const enlarged = dialog.classList.toggle('zoomed');
+        zoom.setAttribute('aria-pressed', String(enlarged));
+        zoom.textContent = enlarged ? 'Vừa màn hình' : 'Phóng 100%';
+      });
+      document.querySelector('[data-close]').addEventListener('click', () => dialog.close());
+      dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+      dialog.addEventListener('close', () => { image.removeAttribute('src'); trigger?.focus(); });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+[
+  {
+    "name": "road",
+    "color": "#804080",
+    "type": "any",
+    "attributes": []
+  },
+  {
+    "name": "sidewalk",
+    "color": "#f423e8",
+    "type": "any",
+    "attributes": []
+  }
+]
